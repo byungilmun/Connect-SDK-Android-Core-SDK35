@@ -14,6 +14,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 
+import com.connectsdk.service.webos.lgcast.common.utils.Logger;
+
 public class MirroringServiceEvent {
     public interface ScreenOnOffListener {
         void onScreenOnOffChanged(boolean turnOn);
@@ -66,10 +68,22 @@ public class MirroringServiceEvent {
     }
 
     public void quit() {
-        if (mScreenOnOffReceiver != null) mContext.unregisterReceiver(mScreenOnOffReceiver);
-        mScreenOnOffReceiver = null;
+        if (mScreenOnOffReceiver != null) {
+            try {
+                mContext.unregisterReceiver(mScreenOnOffReceiver);
+            } catch (IllegalArgumentException e) {
+                Logger.print("Receiver already unregistered");
+            }
+            mScreenOnOffReceiver = null;
+        }
 
-        if (mAccessibilitySettingObserver != null) mContext.getContentResolver().unregisterContentObserver(mAccessibilitySettingObserver);
-        mAccessibilitySettingObserver = null;
+        if (mAccessibilitySettingObserver != null) {
+            try {
+                mContext.getContentResolver().unregisterContentObserver(mAccessibilitySettingObserver);
+            } catch (IllegalStateException | IllegalArgumentException e) {
+                Logger.print("ContentObserver already unregistered");
+            }
+            mAccessibilitySettingObserver = null;
+        }
     }
 }
